@@ -15,7 +15,8 @@ import org.testng.annotations.Test;
 
 public class TestNGTodoMobile {
 
-    private RemoteWebDriver driver;
+    private RemoteWebDriver driver1;
+    private RemoteWebDriver driver2;
     private String Status = "failed";
 
     @BeforeMethod
@@ -23,21 +24,29 @@ public class TestNGTodoMobile {
         String username = System.getenv("LT_USERNAME") == null ? "Your LT Username" : System.getenv("LT_USERNAME");
         String authkey = System.getenv("LT_ACCESS_KEY") == null ? "Your LT AccessKey" : System.getenv("LT_ACCESS_KEY");
         ;
-        String hub = "@mobile-hub.lambdatest.com/wd/hub";
+        String hub = "@hub.lambdatest.com/wd/hub";
 
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("platformName", "android");
-        caps.setCapability("deviceName", "Pixel 4a");
-        caps.setCapability("platformVersion", "11");
-        caps.setCapability("isRealMobile", true);
-        caps.setCapability("build", "TestNG With Java");
-        caps.setCapability("name", m.getName() + this.getClass().getName());
-        caps.setCapability("plugin", "git-testng");
+        DesiredCapabilities caps1 = new DesiredCapabilities();
+        caps1.setCapability("platformName", "android");
+        caps1.setCapability("deviceName", "Pixel 4a");
+        caps1.setCapability("platformVersion", "11");
+        // caps.setCapability("isRealMobile", true);
+        caps1.setCapability("build", "TestNG With Java");
+        caps1.setCapability("name", m.getName() + this.getClass().getName());
+        caps1.setCapability("plugin", "git-testng");
 
-        String[] Tags = new String[] { "Feature", "Tag", "Moderate" };
-        caps.setCapability("tags", Tags);
 
-        driver = new RemoteWebDriver(new URL("https://" + username + ":" + authkey + hub), caps);
+        DesiredCapabilities caps2 = new DesiredCapabilities();
+        caps2.setCapability("platform", "MacOS Catalina");
+        caps2.setCapability("browserName", "Safari");
+        caps2.setCapability("version", "latest");
+        caps2.setCapability("build", "TestNG With Java");
+        caps2.setCapability("name", m.getName() + " - " + this.getClass().getName());
+        caps2.setCapability("plugin", "git-testng");
+
+
+        driver1 = new RemoteWebDriver(new URL("https://" + username + ":" + authkey + hub), caps1);
+        driver2 = new RemoteWebDriver(new URL("https://" + username + ":" + authkey + hub), caps2);
     }
 
     @Test
@@ -45,64 +54,43 @@ public class TestNGTodoMobile {
         String spanText;
         System.out.println("Loading Url");
         Thread.sleep(100);
-        driver.get("https://lambdatest.github.io/sample-todo-app/");
+        driver1.get("https://lambdatest.github.io/sample-todo-app/");
 
-        System.out.println("Checking Box");
-        driver.findElement(By.name("li1")).click();
+        driver2.get("https://google.com");
+        Thread.sleep(300);
 
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li2")).click();
 
-        System.out.println("Checking Box");
-        driver.findElement(By.name("li3")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li4")).click();
-
-        driver.findElement(By.id("sampletodotext")).sendKeys(" List Item 6");
-        driver.findElement(By.id("addbutton")).click();
-
-        driver.findElement(By.id("sampletodotext")).sendKeys(" List Item 7");
-        driver.findElement(By.id("addbutton")).click();
-
-        driver.findElement(By.id("sampletodotext")).sendKeys(" List Item 8");
-        driver.findElement(By.id("addbutton")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li1")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li3")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li7")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li8")).click();
-
-        System.out.println("Entering Text");
-        driver.findElement(By.id("sampletodotext")).sendKeys("Get Taste of Lambda and Stick to It");
-
-        driver.findElement(By.id("addbutton")).click();
-
-        System.out.println("Checking Another Box");
-        driver.findElement(By.name("li9")).click();
-
-        // Let's also assert that the todo we added is present in the list.
-
-        spanText = driver.findElementByXPath("/html/body/div/div/div/ul/li[9]/span").getText();
-        Assert.assertEquals("Get Taste of Lambda and Stick to It", spanText);
+        spanText = driver1.findElementByXPath("/html/body/div/div/h2").getText();
+        Assert.assertEquals("LambdaTest Sample App", spanText);
         Status = "passed";
         Thread.sleep(800);
 
         System.out.println("TestFinished");
+        System.out.println(spanText);
+
+
+        driver2.get("https://google.com");
+        Thread.sleep(300);
+
+        System.out.println("Entering Text");
+        driver2.findElement(By.id("APjFqb")).sendKeys(spanText);
+
+        driver2.findElement(By.xpath("(//input[@class='gNO89b'])[1]")).click();
+
+        Thread.sleep(150);
+
+        System.out.println("TestFinished");
+
 
     }
 
     @AfterMethod
     public void tearDown() {
-        driver.executeScript("lambda-status=" + Status);
-        driver.quit();
+        driver1.executeScript("lambda-status=" + Status);
+        driver2.executeScript("lambda-status=" + Status);
+        driver1.quit();
+        driver2.quit();
+
     }
 
 }
